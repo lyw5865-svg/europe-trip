@@ -177,6 +177,7 @@ createApp({
         // -------------------------------------------------------------
         // 🛠️ 重要：請在此替換成您 Google 試算表對應分頁的發布 CSV 網址！
         // -------------------------------------------------------------
+       // ==================== 覆蓋開始 ====================
         const SHEET_URLS = {
             itinerary: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQnPh57pgIDXLCFGvbjGClXofcBg64KeWOyLGTib5Lz6oeIKwqLznHMMo3Tt8OLlKjGDi_HIS6sEVK8/pub?output=csv",
             flights: "https://docs.google.com/spreadsheets/d/e/2PACX-1vS40iTSsR86m36CtNla9vHaDoKkWBK7ZioEShTZR2TbyNXZABggoOqSUvOK1lHDtwKKwaQbVV4BmS8p/pub?output=csv"
@@ -192,22 +193,35 @@ createApp({
         const daysData = ref({});
         const flightDatabase = ref({});
 
+        // 強化版 CSV 解析工具：完美支援獨立雙網址
         const parseCSV = (text) => {
+            if (!text) return [];
             return text.split('\n').map(line => {
                 return line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || line.split(',');
             }).map(row => row ? row.map(val => val.replace(/^"|"$/g, '').trim()) : []);
         };
 
+        // 雙網址直讀與自動對接核心
         const loadTravelData = async () => {
             try {
-                // 1. 抓取航班分頁並建檔
+                // 1. 讀取獨立的航班庫
                 const fRes = await fetch(SHEET_URLS.flights);
                 const fRows = parseCSV(await fRes.text());
+                
                 fRows.slice(1).forEach(row => {
-                    if(row[0]) flightDatabase.value[row[0].toUpperCase()] = { from: row[1], to: row[2], dep: row[3], arr: row[4], note: row[5] };
+                    if(row[0]) {
+                        const flightKey = row[0].toUpperCase().trim();
+                        flightDatabase.value[flightKey] = { 
+                            from: row[1] || "", 
+                            to: row[2] || "", 
+                            dep: row[3] || "", 
+                            arr: row[4] || "", 
+                            note: row[5] || "" 
+                        };
+                    }
                 });
 
-                // 2. 抓取主行程並動態渲染
+                // 2. 讀取獨立的主行程表
                 const iRes = await fetch(SHEET_URLS.itinerary);
                 const iRows = parseCSV(await iRes.text());
                 const tempDaysData = {};
@@ -215,10 +229,10 @@ createApp({
                 iRows.slice(1).forEach(row => {
                     if (row.length < 4 || !row[0]) return;
                     const dayNum = parseInt(row[0]);
-                    const dateStr = row[1];
-                    const timeStr = row[2];
-                    const typeStr = row[3];
-                    const titleStr = row[4];
+                    const dateStr = row[1] || "";
+                    const timeStr = row[2] || "";
+                    const typeStr = row[3] || "";
+                    const titleStr = row[4] || "";
                     let descStr = row[5] || "";
 
                     if (!tempDaysData[dayNum]) tempDaysData[dayNum] = { date: dateStr, events: [] };
@@ -229,10 +243,13 @@ createApp({
                     // 智慧標籤顏色分類
                     if (typeStr === "航班" || typeStr === "Flight") {
                         tagColor = "bg-blue-600";
-                        const flightInfo = flightDatabase.value[titleStr.toUpperCase()];
+                        const targetFlight = titleStr.toUpperCase().trim();
+                        const flightInfo = flightDatabase.value[targetFlight];
                         if (flightInfo) {
-                            finalTitle = `✈️ 航班 ${titleStr.toUpperCase()} (${flightInfo.from} → ${flightInfo.to})`;
+                            finalTitle = `✈️ 航班 ${targetFlight} (${flightInfo.from} → ${flightInfo.to})`;
                             descStr = `⏱️ 起飛：${flightInfo.dep} / 抵達：${flightInfo.arr}\n💡 備忘：${flightInfo.note}\n${descStr}`;
+                        } else {
+                            finalTitle = `✈️ 航班 ${titleStr} (未找到航班細節)`;
                         }
                     } else if (typeStr === "美食" || typeStr === "餐廳" || typeStr === "咖啡") {
                         tagColor = "bg-green-600";
@@ -261,10 +278,12 @@ createApp({
                 });
 
                 daysData.value = tempDaysData;
+                console.log("📊 雙網址大腦對接成功！");
             } catch (error) {
                 console.error("資料讀取失敗，請確認雲端發布設定。", error);
             }
         };
+        // ==================== 覆蓋結束 ====================
 
         // 記帳模組
         const newExpenseName = ref("");
