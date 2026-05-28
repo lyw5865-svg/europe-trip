@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/128/197/197561.png">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/128/197/197561.png">
+    <meta name="apple-mobile-web-app-title" content="歐洲行程">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2026 全家歐洲自由行</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@700;900&display=swap');
+        body { background-color: #FDFBF7; background-image: radial-gradient(#E63946 0.5px, transparent 0.5px); background-size: 20px 20px; font-family: 'Noto Sans TC', sans-serif; color: #000; }
+        .neo-brutal { border: 4px solid #000; box-shadow: 8px 8px 0px 0px #000; transition: all 0.1s; }
+        .neo-brutal:active { box-shadow: 2px 2px 0px 0px #000; transform: translate(4px, 4px); }
+        .tokyo-red { background-color: #E63946; color: white; }
+        .calc-btn { background: white; border: 3px solid black; font-size: 1.5rem; font-weight: 900; padding: 15px; box-shadow: 4px 4px 0px 0px black; }
+        .calc-btn:active { box-shadow: 0px 0px 0px 0px black; transform: translate(2px, 2px); }
+        [v-cloak] { display: none; }
+        .bg-cream { background-color: #D1D5DB; } 
+        .neo-elegant { border: 3px solid #1A1A1A; box-shadow: 4px 4px 0px 0px #1A1A1A; background: #FDFBF7; }
+        .tag-main { background-color: #E63946; color: white; } 
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        .animate-marquee { display: inline-block; animation: marquee 20s linear infinite; min-width: 100%; }
+    </style>
+</head>
+<body class="max-w-xl mx-auto pb-10">
+<div id="app" v-cloak>
+    <div v-if="isAuthorized">
+        
+        <div v-if="view === 'home'" class="p-6 bg-cream min-h-screen flex flex-col justify-center text-center">
+            <header class="mb-12 mt-4">
+                <div class="inline-block border-2 border-black px-6 py-2 rounded-full text-black font-black tracking-[0.2em] text-sm mb-6 bg-white/60">
+                    EUROPE TRIP 2026
+                </div>
+                <h1 class="text-7xl font-black tracking-tighter leading-none text-black mb-4">EUROPE</h1>
+                <h2 class="text-5xl font-black tracking-widest drop-shadow-lg text-[#E63946]">全家自由行</h2>
+                <div class="mt-4 inline-block bg-white border-2 border-black px-4 py-1 text-sm font-bold rounded">
+                    📍 巴黎即時氣溫：{{ currentTemp }}°C
+                </div>
+            </header>
+
+            <nav class="grid grid-cols-2 gap-5 w-full">
+                <div @click="switchView('itinerary')" class="neo-elegant bg-white col-span-2 p-8 flex items-center justify-between cursor-pointer relative overflow-hidden text-left border-4 border-black">
+                    <div class="z-10">
+                        <span class="tag-main px-4 py-1 text-sm font-black tracking-widest uppercase rounded-full mb-3 inline-block bg-black text-white">Family Plan</span>
+                        <h2 class="text-5xl font-black text-black leading-none">完整行程</h2>
+                    </div>
+                    <i class="fas fa-landmark text-9xl text-black opacity-5 absolute -right-4 -bottom-6 rotate-12"></i>
+                </div>
+
+                <div @click="switchView('expense')" class="neo-elegant bg-yellow-400 col-span-2 p-6 flex items-center justify-between cursor-pointer relative overflow-hidden text-left border-4 border-black">
+                    <div class="z-10">
+                        <span class="bg-black text-white px-3 py-1 text-xs font-black tracking-widest uppercase rounded-full mb-2 inline-block">Shopping & Expenses</span>
+                        <h2 class="text-4xl font-black text-black leading-tight">費用估算與記帳</h2>
+                    </div>
+                    <i class="fas fa-hand-holding-dollar text-7xl text-black opacity-10 absolute -right-2 -bottom-2"></i>
+                </div>
+
+                <div @click="switchView('currency')" class="neo-elegant bg-white col-span-2 p-5 h-28 flex items-center justify-between cursor-pointer relative overflow-hidden text-left border-4 border-black">
+                    <div>
+                        <span class="bg-yellow-200 text-yellow-900 px-3 py-1 text-xs font-black tracking-widest uppercase rounded-full w-fit inline-block mb-1">Calc</span>
+                        <h2 class="text-3xl font-black text-black leading-tight">歐元換算計算機</h2>
+                    </div>
+                    <i class="fas fa-calculator text-6xl text-black opacity-5 absolute -right-2 -bottom-2"></i>
+                </div>
+            </nav>
+        </div>
+
+        <div v-if="view === 'expense'" class="p-4 min-h-screen">
+            <button @click="switchView('home')" class="neo-brutal bg-white w-full py-6 mb-6 text-3xl font-black border-4 border-black">返回首頁</button>
+            
+            <div class="neo-brutal bg-white p-5 mb-6 border-4 border-black">
+                <h3 class="text-xl font-black mb-3">🛍️ 隨手記帳 (歐元比率: {{eurRate}})</h3>
+                <div class="flex flex-col gap-3">
+                    <input v-model="newExpenseName" type="text" placeholder="項目名稱 (如: 藥妝、晚餐)" class="border-2 border-black p-2 font-bold">
+                    <div class="flex gap-2">
+                        <input v-model.number="newExpenseAmount" type="number" placeholder="金額" class="border-2 border-black p-2 font-bold flex-grow">
+                        <select v-model="newExpenseCurrency" class="border-2 border-black p-2 font-bold">
+                            <option value="EUR">EUR (€)</option>
+                            <option value="TWD">TWD ($)</option>
+                        </select>
+                    </div>
+                    <button @click="addExpense" class="bg-black text-white py-2 font-black uppercase tracking-wider active:bg-gray-800">儲存帳目</button>
+                </div>
+            </div>
+
+            <div class="neo-brutal bg-white p-4 border-4 border-black mb-6">
+                <div class="flex justify-between items-center border-b-4 border-black pb-2 mb-4">
+                    <span class="text-lg font-black">消費明細列表</span>
+                    <span class="text-xl font-black text-red-600">總計: NT$ {{ Math.round(totalTWD).toLocaleString() }}</span>
+                </div>
+                <div class="space-y-2 max-h-[40vh] overflow-y-auto">
+                    <div v-for="(item, index) in expenses" :key="index" class="flex justify-between items-center border-b border-dashed border-black pb-2">
+                        <div>
+                            <p class="font-black text-base">{{ item.name }}</p>
+                            <p class="text-xs text-gray-500">{{ item.amount }} {{ item.currency }} ≈ NT$ {{ Math.round(convertToTWD(item)) }}</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button @click="editExpense(index)" class="text-blue-600 font-bold text-sm bg-blue-50 px-2 py-1 border border-black">改</button>
+                            <button @click="deleteExpense(index)" class="text-red-600 font-bold text-sm bg-red-50 px-2 py-1 border border-black">刪</button>
+                        </div>
+                    </div>
+                    <p v-if="expenses.length === 0" class="text-center font-bold text-gray-400 py-4">目前尚無記帳資料</p>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="view === 'itinerary'" class="p-4 min-h-screen">
+            <button @click="switchView('home')" class="neo-brutal bg-white w-full py-6 mb-8 text-3xl font-black border-4 border-black">返回首頁</button>
+            
+            <div class="flex space-x-2 overflow-x-auto pb-6">
+                <button v-for="(info, d) in daysData" :key="d" @click="activeDay = parseInt(d)" 
+                    class="neo-brutal px-5 py-3 flex-shrink-0 font-black border-4 border-black" 
+                    :class="activeDay === parseInt(d) ? 'bg-red-500 text-white' : 'bg-white text-black'">
+                    D{{ d }}<br><span class="text-[10px]">{{ info.date }}</span>
+                </button>
+            </div>
+            
+            <div class="mt-2 space-y-4" v-if="daysData[activeDay]">
+                <div v-for="(event, idx) in daysData[activeDay].events" :key="idx" class="neo-brutal bg-white p-5 flex gap-4 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                    <div class="flex flex-col items-center justify-start pt-1">
+                        <span class="text-lg font-black leading-none whitespace-nowrap">{{ event.time }}</span>
+                        <div class="w-1 flex-grow bg-black/10 my-2"></div>
+                    </div>
+                    <div class="flex-grow">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span :class="event.tagColor" class="px-2 py-0.5 text-[10px] font-black text-white rounded uppercase tracking-tighter">{{ event.tag }}</span>
+                        </div>
+                        <h3 class="text-xl font-black leading-tight">{{ event.title }}</h3>
+                        <p class="text-sm font-bold text-gray-500 mt-2 whitespace-pre-line leading-snug" v-html="event.desc"></p>
+                    </div>
+                </div>
+            </div>
+            <p v-else class="text-center font-black text-gray-400 mt-10">讀取中或試算表內尚無此天數資料...</p>
+        </div>
+
+        <div v-if="view === 'currency'" class="p-4 min-h-screen text-center">
+            <button @click="switchView('home')" class="neo-brutal bg-white w-full py-6 mb-8 text-3xl font-black border-4 border-black">返回首頁</button>
+            <div class="neo-brutal bg-white p-6 mb-6 border-4 border-black">
+                <div class="text-right border-b-4 border-black pb-2 mb-4"><p class="text-lg font-bold text-slate-400">歐元 EUR (€)</p><p class="text-5xl font-black">{{ eurDisplay || 0 }}</p></div>
+                <div class="text-right"><p class="text-lg font-bold text-red-600">台幣 TWD ($)</p><p class="text-5xl font-black text-red-600">${{ Math.round(Number(eurDisplay) * eurRate).toLocaleString() }}</p></div>
+            </div>
+            <div class="grid grid-cols-3 gap-4">
+                <button v-for="n in ['1','2','3','4','5','6','7','8','9','0','00']" :key="n" @click="appendEur(n)" class="calc-btn border-4 border-black bg-white p-4 font-black text-2xl">{{n}}</button>
+                <button @click="eurDisplay = ''" class="calc-btn border-4 border-black bg-red-400 text-white p-4 font-black text-2xl">C</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div v-else class="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-8 text-center">
+        <div class="neo-brutal bg-yellow-400 p-10 max-w-md border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+            <h1 class="text-8xl font-black mb-4 uppercase">404</h1>
+            <p class="text-2xl font-black mb-4 uppercase">Access Denied</p>
+            <p class="font-bold text-lg leading-relaxed">
+                這是一份私密的家族旅行計畫。<br>
+                請透過專屬連結存取。
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+const { createApp, ref, computed, onMounted, watch } = Vue;
+
+createApp({
+    setup() {
+        // -------------------------------------------------------------
+        // 🛠️ 重要：請在此替換成您 Google 試算表對應分頁的發布 CSV 網址！
+        // -------------------------------------------------------------
+        const SHEET_URLS = {
+            itinerary: "https://docs.google.com/spreadsheets/d/e/您的試算表ID/pub?gid=0&output=csv",
+            flights: "https://docs.google.com/spreadsheets/d/e/您的試算表ID/pub?gid=12345&output=csv"
+        };
+
+        const isAuthorized = ref(false);
+        const view = ref('home');
+        const activeDay = ref(1);
+        const eurDisplay = ref("");
+        const currentTemp = ref("--");
+        const eurRate = ref(35.5); // 預設歐元台幣匯率
+
+        const daysData = ref({});
+        const flightDatabase = ref({});
+
+        const parseCSV = (text) => {
+            return text.split('\n').map(line => {
+                return line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || line.split(',');
+            }).map(row => row ? row.map(val => val.replace(/^"|"$/g, '').trim()) : []);
+        };
+
+        const loadTravelData = async () => {
+            try {
+                // 1. 抓取航班分頁並建檔
+                const fRes = await fetch(SHEET_URLS.flights);
+                const fRows = parseCSV(await fRes.text());
+                fRows.slice(1).forEach(row => {
+                    if(row[0]) flightDatabase.value[row[0].toUpperCase()] = { from: row[1], to: row[2], dep: row[3], arr: row[4], note: row[5] };
+                });
+
+                // 2. 抓取主行程並動態渲染
+                const iRes = await fetch(SHEET_URLS.itinerary);
+                const iRows = parseCSV(await iRes.text());
+                const tempDaysData = {};
+
+                iRows.slice(1).forEach(row => {
+                    if (row.length < 4 || !row[0]) return;
+                    const dayNum = parseInt(row[0]);
+                    const dateStr = row[1];
+                    const timeStr = row[2];
+                    const typeStr = row[3];
+                    const titleStr = row[4];
+                    let descStr = row[5] || "";
+
+                    if (!tempDaysData[dayNum]) tempDaysData[dayNum] = { date: dateStr, events: [] };
+
+                    let tagColor = "bg-gray-500";
+                    let finalTitle = titleStr;
+
+                    // 智慧標籤顏色分類
+                    if (typeStr === "航班" || typeStr === "Flight") {
+                        tagColor = "bg-blue-600";
+                        const flightInfo = flightDatabase.value[titleStr.toUpperCase()];
+                        if (flightInfo) {
+                            finalTitle = `✈️ 航班 ${titleStr.toUpperCase()} (${flightInfo.from} → ${flightInfo.to})`;
+                            descStr = `⏱️ 起飛：${flightInfo.dep} / 抵達：${flightInfo.arr}\n💡 備忘：${flightInfo.note}\n${descStr}`;
+                        }
+                    } else if (typeStr === "美食" || typeStr === "餐廳" || typeStr === "咖啡") {
+                        tagColor = "bg-green-600";
+                        finalTitle = `🍽️ ${titleStr}`;
+                    } else if (typeStr === "逛街" || typeStr === "購物" || typeStr === "Market") {
+                        tagColor = "bg-yellow-400 text-black";
+                        finalTitle = `🛍️ ${titleStr}`;
+                    } else if (typeStr === "住宿" || typeStr === "Hotel") {
+                        tagColor = "bg-orange-500";
+                        finalTitle = `🏨 ${titleStr}`;
+                    } else if (typeStr === "交通" || typeStr === "自駕" || typeStr === "火車") {
+                        tagColor = "bg-black text-white";
+                        finalTitle = `🚗 ${titleStr}`;
+                    } else {
+                        tagColor = "bg-red-500";
+                        finalTitle = `✨ ${titleStr}`;
+                    }
+
+                    tempDaysData[dayNum].events.push({
+                        time: timeStr,
+                        tag: typeStr,
+                        tagColor: tagColor,
+                        title: finalTitle,
+                        desc: descStr.replace(/\\n/g, '\n').replace(/\n/g, '<br>')
+                    });
+                });
+
+                daysData.value = tempDaysData;
+            } catch (error) {
+                console.error("資料讀取失敗，請確認雲端發布設定。", error);
+            }
+        };
+
+        // 記帳模組
+        const newExpenseName = ref("");
+        const newExpenseAmount = ref(null);
+        const newExpenseCurrency = ref("EUR");
+        const expenses = ref(JSON.parse(localStorage.getItem('europe_expenses')) || []);
+        watch(expenses, (nv) => localStorage.setItem('europe_expenses', JSON.stringify(nv)), { deep: true });
+        
+        const convertToTWD = (item) => item.currency === "EUR" ? item.amount * eurRate.value : item.amount;
+        const totalTWD = computed(() => expenses.value.reduce((sum, item) => sum + convertToTWD(item), 0));
+        
+        const addExpense = () => { 
+            if (newExpenseName.value && newExpenseAmount.value) { 
+                expenses.value.push({ name: newExpenseName.value, amount: newExpenseAmount.value, currency: newExpenseCurrency.value }); 
+                newExpenseName.value = ""; newExpenseAmount.value = null; 
+            } 
+        };
+        const editExpense = (i) => { const item = expenses.value[i]; newExpenseName.value = item.name; newExpenseAmount.value = item.amount; newExpenseCurrency.value = item.currency; expenses.value.splice(i, 1); };
+        const deleteExpense = (i) => { if(confirm("確定刪除？")) expenses.value.splice(i, 1); };
+
+        const switchView = (target) => { view.value = target; window.scrollTo({ top: 0, behavior: 'instant' }); };
+        const appendEur = (v) => { if(eurDisplay.value.length < 10) eurDisplay.value += v; };
+
+        onMounted(() => {
+            loadTravelData();
+            // 自動抓取歐洲央行或即時天氣（範例：巴黎）
+            fetch('https://api.open-meteo.com/v1/forecast?latitude=48.8566&longitude=2.3522&current_weather=true')
+                .then(res => res.json()).then(data => { if(data.current_weather) currentTemp.value = Math.round(data.current_weather.temperature); }).catch(() => {});
+            
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('token') === 'go2026') isAuthorized.value = true;
+        });
+
+        return {
+            isAuthorized, view, activeDay, eurDisplay, currentTemp, daysData, switchView, appendEur, eurRate,
+            newExpenseName, newExpenseAmount, newExpenseCurrency, expenses, totalTWD, addExpense, convertToTWD, editExpense, deleteExpense
+        };
+    }
+}).mount('#app');
+</script>
+</body>
+</html>
