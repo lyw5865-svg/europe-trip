@@ -17,8 +17,8 @@
 
         /* 🎨 配色控制中心 */
         :root {
-            --primary-color: #1D3557;    /* 主色：按鈕、標題強調 (蔚藍) */
-            --bg-base: #F1FAEE;          /* 底色：網頁大背景 (暖沙) */
+            --primary-color: #1D3557;    /* 深午夜藍 */
+            --bg-base: #F1FAEE;          /* 奶油白 */
             --bg-card: #FFFFFF;          /* 卡片底色 */
             --accent-color: #E63946;     /* 時尚紅 */
             --text-main: #1A1A1A;        /* 主要文字顏色 */
@@ -159,17 +159,25 @@
             </div>
             
             <div class="mt-2 space-y-4" v-if="daysData[activeDay]">
-                <div v-for="(event, idx) in daysData[activeDay].events" :key="idx" class="neo-brutal bg-white p-5 flex gap-4 border-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                    <div class="flex flex-col items-center pt-1 min-w-[65px] text-left">
-                        <span class="text-lg font-black leading-none whitespace-nowrap text-black">{{ event.time }}</span>
-                        <div class="w-0.5 flex-grow bg-black/10 my-2"></div>
-                    </div>
-                    <div class="flex-grow text-left">
-                        <div class="mb-1">
-                            <span :class="event.tagColor" class="px-2 py-0.5 text-[10px] font-black text-white rounded uppercase tracking-tighter">{{ event.tag }}</span>
+                <div v-for="(event, idx) in daysData[activeDay].events" :key="idx" class="neo-brutal bg-white p-5 flex flex-col gap-2 border-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                    <div class="flex gap-4">
+                        <div class="flex flex-col items-center pt-1 min-w-[65px] text-left">
+                            <span class="text-lg font-black leading-none whitespace-nowrap text-black">{{ event.time }}</span>
+                            <div class="w-0.5 flex-grow bg-black/10 my-2"></div>
                         </div>
-                        <h3 class="text-xl font-black leading-tight">{{ event.title }}</h3>
-                        <p class="text-sm font-bold text-gray-500 mt-2 whitespace-pre-line leading-snug" v-html="event.desc"></p>
+                        <div class="flex-grow text-left">
+                            <div class="mb-1">
+                                <span :class="event.tagColor" class="px-2 py-0.5 text-[10px] font-black text-white rounded uppercase tracking-tighter">{{ event.tag }}</span>
+                            </div>
+                            <h3 class="text-xl font-black leading-tight">{{ event.title }}</h3>
+                            <p class="text-sm font-bold text-gray-500 mt-2 whitespace-pre-line leading-snug" v-html="event.desc"></p>
+                        </div>
+                    </div>
+                    
+                    <div v-if="event.mapUrl" class="mt-2 border-t border-dashed border-gray-200 pt-3 flex justify-end">
+                        <a :href="event.mapUrl" target="_blank" class="bg-accent text-black px-4 py-2 rounded text-xs font-black tracking-wider neo-brutal inline-flex items-center gap-2 border-2">
+                            <i class="fas fa-location-arrow"></i> 🗺️ 開啟 GOOGLE MAP 導航
+                        </a>
                     </div>
                 </div>
             </div>
@@ -256,10 +264,19 @@ createApp({
             }).map(row => row ? row.map(val => val.replace(/^"|"$/g, '').trim()) : []);
         };
 
-        // 💡 智慧防呆過濾核心：把所有空格、小寫、以及括號(+1)全部抹除，只留純代號
         const cleanFlightCode = (str) => {
             if (!str) return "";
             return str.toUpperCase().replace(/\s+/g, '').replace(/\(\+\d+\)/g, '').trim();
+        };
+
+        // 🧠 網址偵測核心：抓取任何可能隱藏在試算表欄位中的 URL 連結
+        const extractMapUrl = (text1, text2) => {
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            const match1 = String(text1 || "").match(urlRegex);
+            if (match1) return match1[0];
+            const match2 = String(text2 || "").match(urlRegex);
+            if (match2) return match2[0];
+            return null;
         };
 
         const loadTravelData = async () => {
@@ -290,9 +307,16 @@ createApp({
                     let tagColor = "bg-gray-500";
                     let finalTitle = titleStr;
 
+                    // 🗺️ 自動提取 Google Map 網址
+                    const mapUrl = extractMapUrl(titleStr, descStr);
+
+                    // 如果網址藏在描述裡，把文字乾淨化（移除網址字串避免污染畫面）
+                    if (mapUrl) {
+                        descStr = descStr.replace(mapUrl, '').trim();
+                    }
+
                     if (typeStr === "航班" || typeStr === "Flight") {
                         tagColor = "bg-blue-600";
-                        // 這裡進行模糊清潔比對
                         const targetFlight = cleanFlightCode(titleStr);
                         const flightInfo = flightDatabase.value[targetFlight];
                         if (flightInfo) {
@@ -311,8 +335,9 @@ createApp({
                         time: timeStr, 
                         tag: typeStr, 
                         tagColor, 
-                        title: finalTitle,
-                        desc: descStr.replace(/\\n/g, '\n').replace(/\n/g, '<br>')
+                        title: finalTitle.replace(mapUrl, '').trim(), // 保持標題乾淨
+                        desc: descStr.replace(/\\n/g, '\n').replace(/\n/g, '<br>'),
+                        mapUrl: mapUrl
                     });
                 });
                 daysData.value = tempDaysData;
