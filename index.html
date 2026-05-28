@@ -14,7 +14,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght=700;900&display=swap');
         body { background-color: #FDFBF7; background-image: radial-gradient(#E63946 0.5px, transparent 0.5px); background-size: 20px 20px; font-family: 'Noto Sans TC', sans-serif; color: #000; }
         .neo-brutal { border: 4px solid #000; box-shadow: 8px 8px 0px 0px #000; transition: all 0.1s; }
         .neo-brutal:active { box-shadow: 2px 2px 0px 0px #000; transform: translate(4px, 4px); }
@@ -25,11 +25,6 @@
         .bg-cream { background-color: #D1D5DB; } 
         .neo-elegant { border: 3px solid #1A1A1A; box-shadow: 4px 4px 0px 0px #1A1A1A; background: #FDFBF7; }
         .tag-main { background-color: #E63946; color: white; } 
-        @keyframes marquee {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
-        }
-        .animate-marquee { display: inline-block; animation: marquee 20s linear infinite; min-width: 100%; }
     </style>
 </head>
 <body class="max-w-xl mx-auto pb-10">
@@ -37,11 +32,11 @@
     <div v-if="isAuthorized">
         
         <div v-if="view === 'home'" class="p-6 bg-cream min-h-screen flex flex-col justify-center text-center">
-            <header class="mb-12 mt-4">
-                <div class="inline-block border-2 border-black px-6 py-2 rounded-full text-black font-black tracking-[0.2em] text-sm mb-6 bg-white/60">
+            <header class="mb-8 mt-4">
+                <div class="inline-block border-2 border-black px-6 py-2 rounded-full text-black font-black tracking-[0.2em] text-sm mb-4 bg-white/60">
                     EUROPE TRIP 2026
                 </div>
-                <h1 class="text-7xl font-black tracking-tighter leading-none text-black mb-4">EUROPE</h1>
+                <h1 class="text-7xl font-black tracking-tighter leading-none text-black mb-2">EUROPE</h1>
                 <h2 class="text-5xl font-black tracking-widest drop-shadow-lg text-[#E63946]">全家自由行</h2>
                 <div class="mt-4 inline-block bg-white border-2 border-black px-4 py-1 text-sm font-bold rounded">
                     📍 巴黎即時氣溫：{{ currentTemp }}°C
@@ -49,30 +44,114 @@
             </header>
 
             <nav class="grid grid-cols-2 gap-5 w-full">
-                <div @click="switchView('itinerary')" class="neo-elegant bg-white col-span-2 p-8 flex items-center justify-between cursor-pointer relative overflow-hidden text-left border-4 border-black">
+                <div @click="switchView('itinerary')" class="neo-elegant bg-white col-span-2 p-6 flex items-center justify-between cursor-pointer relative overflow-hidden text-left border-4 border-black">
                     <div class="z-10">
-                        <span class="tag-main px-4 py-1 text-sm font-black tracking-widest uppercase rounded-full mb-3 inline-block bg-black text-white">Family Plan</span>
-                        <h2 class="text-5xl font-black text-black leading-none">完整行程</h2>
+                        <span class="tag-main px-4 py-1 text-sm font-black tracking-widest uppercase rounded-full mb-2 inline-block bg-black text-white">Family Plan</span>
+                        <h2 class="text-4xl font-black text-black leading-none">完整行程</h2>
                     </div>
-                    <i class="fas fa-landmark text-9xl text-black opacity-5 absolute -right-4 -bottom-6 rotate-12"></i>
+                    <i class="fas fa-landmark text-8xl text-black opacity-5 absolute -right-4 -bottom-4 rotate-12"></i>
                 </div>
 
-                <div @click="switchView('expense')" class="neo-elegant bg-yellow-400 col-span-2 p-6 flex items-center justify-between cursor-pointer relative overflow-hidden text-left border-4 border-black">
+                <div @click="switchView('tickets')" class="neo-elegant bg-blue-600 text-white col-span-2 p-6 flex items-center justify-between cursor-pointer relative overflow-hidden text-left border-4 border-black">
                     <div class="z-10">
-                        <span class="bg-black text-white px-3 py-1 text-xs font-black tracking-widest uppercase rounded-full mb-2 inline-block">Shopping & Expenses</span>
-                        <h2 class="text-4xl font-black text-black leading-tight">費用估算與記帳</h2>
+                        <span class="bg-white text-blue-600 px-3 py-1 text-xs font-black tracking-widest uppercase rounded-full mb-2 inline-block">Flight Tickets</span>
+                        <h2 class="text-4xl font-black leading-none">電子機票資訊</h2>
                     </div>
-                    <i class="fas fa-hand-holding-dollar text-7xl text-black opacity-10 absolute -right-2 -bottom-2"></i>
+                    <i class="fas fa-plane-departure text-8xl text-white opacity-20 absolute -right-4 -bottom-4 rotate-12"></i>
                 </div>
 
-                <div @click="switchView('currency')" class="neo-elegant bg-white col-span-2 p-5 h-28 flex items-center justify-between cursor-pointer relative overflow-hidden text-left border-4 border-black">
+                <div @click="switchView('expense')" class="neo-elegant bg-yellow-400 col-span-2 p-5 flex items-center justify-between cursor-pointer relative overflow-hidden text-left border-4 border-black">
+                    <div class="z-10">
+                        <span class="bg-black text-white px-3 py-1 text-xs font-black tracking-widest uppercase rounded-full mb-2 inline-block">Expenses</span>
+                        <h2 class="text-3xl font-black text-black leading-none">費用估算與記帳</h2>
+                    </div>
+                    <i class="fas fa-hand-holding-dollar text-6xl text-black opacity-10 absolute -right-2 -bottom-2"></i>
+                </div>
+
+                <div @click="switchView('currency')" class="neo-elegant bg-white col-span-2 p-5 flex items-center justify-between cursor-pointer relative overflow-hidden text-left border-4 border-black">
                     <div>
                         <span class="bg-yellow-200 text-yellow-900 px-3 py-1 text-xs font-black tracking-widest uppercase rounded-full w-fit inline-block mb-1">Calc</span>
-                        <h2 class="text-3xl font-black text-black leading-tight">歐元換算計算機</h2>
+                        <h2 class="text-3xl font-black text-black leading-none">歐元換算計算機</h2>
                     </div>
                     <i class="fas fa-calculator text-6xl text-black opacity-5 absolute -right-2 -bottom-2"></i>
                 </div>
             </nav>
+        </div>
+
+        <div v-if="view === 'tickets'" class="p-4 min-h-screen">
+            <button @click="switchView('home')" class="neo-brutal bg-white w-full py-6 mb-8 text-3xl font-black border-4 border-black">返回首頁</button>
+            
+            <div class="space-y-6">
+                <div v-for="(flight, code) in flightDatabase" :key="code" class="neo-brutal bg-white border-4 border-black overflow-hidden shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+                    <div class="bg-blue-600 text-white p-4 border-b-4 border-black flex justify-between items-center">
+                        <span class="text-2xl font-black tracking-wider"><i class="fas fa-ticket-alt mr-2"></i>BOARDING PASS</span>
+                        <span class="bg-black text-white px-3 py-1 text-sm font-black rounded">{{ code }}</span>
+                    </div>
+                    
+                    <div class="p-6 bg-[#FFFDF9] border-b-2 border-dashed border-black flex justify-between items-center text-center">
+                        <div class="w-2/5">
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">FROM</p>
+                            <p class="text-2xl font-black text-black leading-tight mt-1">{{ flight.from }}</p>
+                        </div>
+                        <div class="w-1/5 text-blue-600 text-2xl animate-pulse">
+                            <i class="fas fa-long-arrow-alt-right"></i>
+                        </div>
+                        <div class="w-2/5">
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">TO</p>
+                            <p class="text-2xl font-black text-black leading-tight mt-1">{{ flight.to }}</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 p-5 bg-white text-left border-b-4 border-black">
+                        <div>
+                            <p class="text-xs font-black text-gray-400"><i class="far fa-clock mr-1"></i> DEP TIME (起飛)</p>
+                            <p class="text-xl font-black text-blue-600 mt-0.5">{{ flight.dep }}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs font-black text-gray-400"><i class="far fa-clock mr-1"></i> ARR TIME (降落)</p>
+                            <p class="text-xl font-black text-gray-800 mt-0.5">{{ flight.arr }}</p>
+                        </div>
+                    </div>
+
+                    <div class="p-5 bg-yellow-50 text-left">
+                        <p class="text-xs font-black text-amber-800 uppercase tracking-wider mb-1">💡 航班備忘與提醒：</p>
+                        <p class="text-sm font-bold text-gray-700 whitespace-pre-line leading-relaxed">{{ flight.note || "暫無填寫備忘事項。" }}</p>
+                    </div>
+                </div>
+
+                <div v-if="Object.keys(flightDatabase).length === 0" class="text-center py-10 text-gray-400 font-black">
+                    目前航班分頁無資料，請先在 Google Sheets 內建立航班。
+                </div>
+            </div>
+        </div>
+
+        <div v-if="view === 'itinerary'" class="p-4 min-h-screen">
+            <button @click="switchView('home')" class="neo-brutal bg-white w-full py-6 mb-8 text-3xl font-black border-4 border-black">返回首頁</button>
+            
+            <div class="flex space-x-2 overflow-x-auto pb-6">
+                <button v-for="(info, d) in daysData" :key="d" @click="activeDay = parseInt(d)" 
+                    class="neo-brutal px-5 py-3 flex-shrink-0 font-black border-4 border-black" 
+                    :class="activeDay === parseInt(d) ? 'bg-red-500 text-white' : 'bg-white text-black'">
+                    D{{ d }}<br><span class="text-[10px]">{{ info.date }}</span>
+                </button>
+            </div>
+            
+            <div class="mt-2 space-y-4" v-if="daysData[activeDay]">
+                <div v-for="(event, idx) in daysData[activeDay].events" :key="idx" class="neo-brutal bg-white p-5 flex gap-4 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                    <div class="flex flex-col items-center justify-start pt-1">
+                        <span class="text-lg font-black leading-none whitespace-nowrap">{{ event.time }}</span>
+                        <div class="w-1 flex-grow bg-black/10 my-2"></div>
+                    </div>
+                    <div class="flex-grow">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span :class="event.tagColor" class="px-2 py-0.5 text-[10px] font-black text-white rounded uppercase tracking-tighter">{{ event.tag }}</span>
+                        </div>
+                        <h3 class="text-xl font-black leading-tight">{{ event.title }}</h3>
+                        <p class="text-sm font-bold text-gray-500 mt-2 whitespace-pre-line leading-snug" v-html="event.desc"></p>
+                    </div>
+                </div>
+            </div>
+            <p v-else class="text-center font-black text-gray-400 mt-10">讀取中或試算表內尚無此天數資料...</p>
         </div>
 
         <div v-if="view === 'expense'" class="p-4 min-h-screen">
@@ -109,38 +188,8 @@
                             <button @click="deleteExpense(index)" class="text-red-600 font-bold text-sm bg-red-50 px-2 py-1 border border-black">刪</button>
                         </div>
                     </div>
-                    <p v-if="expenses.length === 0" class="text-center font-bold text-gray-400 py-4">目前尚無記帳資料</p>
                 </div>
             </div>
-        </div>
-
-        <div v-if="view === 'itinerary'" class="p-4 min-h-screen">
-            <button @click="switchView('home')" class="neo-brutal bg-white w-full py-6 mb-8 text-3xl font-black border-4 border-black">返回首頁</button>
-            
-            <div class="flex space-x-2 overflow-x-auto pb-6">
-                <button v-for="(info, d) in daysData" :key="d" @click="activeDay = parseInt(d)" 
-                    class="neo-brutal px-5 py-3 flex-shrink-0 font-black border-4 border-black" 
-                    :class="activeDay === parseInt(d) ? 'bg-red-500 text-white' : 'bg-white text-black'">
-                    D{{ d }}<br><span class="text-[10px]">{{ info.date }}</span>
-                </button>
-            </div>
-            
-            <div class="mt-2 space-y-4" v-if="daysData[activeDay]">
-                <div v-for="(event, idx) in daysData[activeDay].events" :key="idx" class="neo-brutal bg-white p-5 flex gap-4 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                    <div class="flex flex-col items-center justify-start pt-1">
-                        <span class="text-lg font-black leading-none whitespace-nowrap">{{ event.time }}</span>
-                        <div class="w-1 flex-grow bg-black/10 my-2"></div>
-                    </div>
-                    <div class="flex-grow">
-                        <div class="flex items-center gap-2 mb-1">
-                            <span :class="event.tagColor" class="px-2 py-0.5 text-[10px] font-black text-white rounded uppercase tracking-tighter">{{ event.tag }}</span>
-                        </div>
-                        <h3 class="text-xl font-black leading-tight">{{ event.title }}</h3>
-                        <p class="text-sm font-bold text-gray-500 mt-2 whitespace-pre-line leading-snug" v-html="event.desc"></p>
-                    </div>
-                </div>
-            </div>
-            <p v-else class="text-center font-black text-gray-400 mt-10">讀取中或試算表內尚無此天數資料...</p>
         </div>
 
         <div v-if="view === 'currency'" class="p-4 min-h-screen text-center">
@@ -174,10 +223,7 @@ const { createApp, ref, computed, onMounted, watch } = Vue;
 
 createApp({
     setup() {
-        // -------------------------------------------------------------
-        // 🛠️ 重要：請在此替換成您 Google 試算表對應分頁的發布 CSV 網址！
-        // -------------------------------------------------------------
-       // ==================== 覆蓋開始 ====================
+        // 您提供的雙工作表雲端網址
         const SHEET_URLS = {
             itinerary: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQnPh57pgIDXLCFGvbjGClXofcBg64KeWOyLGTib5Lz6oeIKwqLznHMMo3Tt8OLlKjGDi_HIS6sEVK8/pub?output=csv",
             flights: "https://docs.google.com/spreadsheets/d/e/2PACX-1vS40iTSsR86m36CtNla9vHaDoKkWBK7ZioEShTZR2TbyNXZABggoOqSUvOK1lHDtwKKwaQbVV4BmS8p/pub?output=csv"
@@ -193,7 +239,6 @@ createApp({
         const daysData = ref({});
         const flightDatabase = ref({});
 
-        // 強化版 CSV 解析工具：完美支援獨立雙網址
         const parseCSV = (text) => {
             if (!text) return [];
             return text.split('\n').map(line => {
@@ -201,7 +246,6 @@ createApp({
             }).map(row => row ? row.map(val => val.replace(/^"|"$/g, '').trim()) : []);
         };
 
-        // 雙網址直讀與自動對接核心
         const loadTravelData = async () => {
             try {
                 // 1. 讀取獨立的航班庫
@@ -240,7 +284,6 @@ createApp({
                     let tagColor = "bg-gray-500";
                     let finalTitle = titleStr;
 
-                    // 智慧標籤顏色分類
                     if (typeStr === "航班" || typeStr === "Flight") {
                         tagColor = "bg-blue-600";
                         const targetFlight = titleStr.toUpperCase().trim();
@@ -249,7 +292,7 @@ createApp({
                             finalTitle = `✈️ 航班 ${targetFlight} (${flightInfo.from} → ${flightInfo.to})`;
                             descStr = `⏱️ 起飛：${flightInfo.dep} / 抵達：${flightInfo.arr}\n💡 備忘：${flightInfo.note}\n${descStr}`;
                         } else {
-                            finalTitle = `✈️ 航班 ${titleStr} (未找到航班細節)`;
+                            finalTitle = `⚠️ 航班 [${titleStr}] 設定未對齊`;
                         }
                     } else if (typeStr === "美食" || typeStr === "餐廳" || typeStr === "咖啡") {
                         tagColor = "bg-green-600";
@@ -278,14 +321,13 @@ createApp({
                 });
 
                 daysData.value = tempDaysData;
-                console.log("📊 雙網址大腦對接成功！");
+                console.log("📊 雙網址大腦與電子機票頁面同步成功！");
             } catch (error) {
                 console.error("資料讀取失敗，請確認雲端發布設定。", error);
             }
         };
-        // ==================== 覆蓋結束 ====================
 
-        // 記帳模組
+        // 記帳與費用模組
         const newExpenseName = ref("");
         const newExpenseAmount = ref(null);
         const newExpenseCurrency = ref("EUR");
@@ -309,16 +351,15 @@ createApp({
 
         onMounted(() => {
             loadTravelData();
-            // 自動抓取歐洲央行或即時天氣（範例：巴黎）
             fetch('https://api.open-meteo.com/v1/forecast?latitude=48.8566&longitude=2.3522&current_weather=true')
-                .then(res => res.json()).then(data => { if(data.current_weather) currentTemp.value = Math.round(data.current_weather.temperature); }).catch(() => {});
+                .then(res => res.json()).then(data => { if(data.current_weather) currentTemp.value = Math.round(data.current_weather.temperature); });
             
             const params = new URLSearchParams(window.location.search);
             if (params.get('token') === 'go2026') isAuthorized.value = true;
         });
 
         return {
-            isAuthorized, view, activeDay, eurDisplay, currentTemp, daysData, switchView, appendEur, eurRate,
+            isAuthorized, view, activeDay, eurDisplay, currentTemp, daysData, flightDatabase, switchView, appendEur, eurRate,
             newExpenseName, newExpenseAmount, newExpenseCurrency, expenses, totalTWD, addExpense, convertToTWD, editExpense, deleteExpense
         };
     }
