@@ -276,14 +276,7 @@ createApp({
             return str.toUpperCase().replace(/\s+/g, '').replace(/\(\+\d+\)/g, '').trim();
         };
 
-        const extractMapUrl = (text1, text2) => {
-            const urlRegex = /(https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b[-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
-            const match1 = String(text1 || "").match(urlRegex);
-            if (match1) return match1[0].trim();
-            const match2 = String(text2 || "").match(urlRegex);
-            if (match2) return match2[0].trim();
-            return null;
-        };
+        // 💡 提示：原本這裡的 extractMapUrl 函式已經被乾淨地移除了，因為方案二直接讀取 G 欄。
 
         const loadTravelData = async () => {
             try {
@@ -292,8 +285,6 @@ createApp({
                 fRows.slice(1).forEach(row => {
                     if(row[0]) {
                         const cleanCode = cleanFlightCode(row[0]);
-                        // 💡 這裡假設試算表中的第 6 欄 (row[6]) 是日期（例如：2026/08/20）
-                        // 如果你的試算表日期在其他欄位，可以修改 row[6] 為對應的索引值
                         flightDatabase.value[cleanCode] = { 
                             from: row[1], 
                             to: row[2], 
@@ -317,15 +308,12 @@ createApp({
                     let titleStr = row[4] || "";
                     let descStr = row[5] || "";
                     
+                    // 🗺️ 【方案二核心】：直接讀取試算表的第 7 欄 (G欄) 的地圖網址
+                    const mapUrl = row[6] || null;
+
                     if (!tempDaysData[dayNum]) tempDaysData[dayNum] = { date: row[1], events: [] };
 
                     let tagColor = "bg-gray-500";
-
-                    const mapUrl = extractMapUrl(titleStr, descStr);
-                    if (mapUrl) {
-                        titleStr = titleStr.replace(mapUrl, '').replace(/\s+/g, ' ').trim();
-                        descStr = descStr.replace(mapUrl, '').trim();
-                    }
 
                     if (typeStr === "航班" || typeStr === "Flight") {
                         tagColor = "bg-blue-600";
@@ -349,7 +337,7 @@ createApp({
                         tagColor, 
                         title: titleStr, 
                         desc: descStr.replace(/\\n/g, '\n').replace(/\n/g, '<br>'),
-                        mapUrl: mapUrl
+                        mapUrl: mapUrl // 👈 完美存入 event 物件中
                     });
                 });
                 daysData.value = tempDaysData;
