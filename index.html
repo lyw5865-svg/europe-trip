@@ -299,19 +299,17 @@ createApp({
                     const dayNum = parseInt(row[0]);
                     const timeStr = row[2] || "";
                     const typeStr = row[3] || "";
-                    const titleStr = row[4] || "";
+                    let titleStr = row[4] || "";
                     let descStr = row[5] || "";
                     
                     if (!tempDaysData[dayNum]) tempDaysData[dayNum] = { date: row[1], events: [] };
 
                     let tagColor = "bg-gray-500";
-                    let finalTitle = titleStr;
 
-                    // 🗺️ 自動提取 Google Map 網址
+                    // 🗺️ 智慧提取與拔除網址（精準 replace 確保前後文字存活）
                     const mapUrl = extractMapUrl(titleStr, descStr);
-
-                    // 如果網址藏在描述裡，把文字乾淨化（移除網址字串避免污染畫面）
                     if (mapUrl) {
+                        titleStr = titleStr.replace(mapUrl, '').replace(/\s+/g, ' ').trim();
                         descStr = descStr.replace(mapUrl, '').trim();
                     }
 
@@ -320,10 +318,10 @@ createApp({
                         const targetFlight = cleanFlightCode(titleStr);
                         const flightInfo = flightDatabase.value[targetFlight];
                         if (flightInfo) {
-                            finalTitle = `✈️ 航班 ${targetFlight} (${flightInfo.from} → ${flightInfo.to})`;
+                            titleStr = `✈️ 航班 ${targetFlight} (${flightInfo.from} → ${flightInfo.to})`;
                             descStr = `⏱️ 起飛：${flightInfo.dep} / 抵達：${flightInfo.arr}\n💡 備忘：${flightInfo.note}\n${descStr}`;
                         } else {
-                            finalTitle = `⚠️ 航班 [${titleStr}] 設定未對齊`;
+                            titleStr = `⚠️ 航班 [${titleStr}] 設定未對齊`;
                         }
                     } else if (typeStr === "美食" || typeStr === "餐廳") tagColor = "bg-emerald-600";
                     else if (typeStr === "逛街" || typeStr === "購物") tagColor = "bg-amber-500";
@@ -335,7 +333,7 @@ createApp({
                         time: timeStr, 
                         tag: typeStr, 
                         tagColor, 
-                        title: finalTitle.replace(mapUrl, '').trim(), // 保持標題乾淨
+                        title: titleStr, 
                         desc: descStr.replace(/\\n/g, '\n').replace(/\n/g, '<br>'),
                         mapUrl: mapUrl
                     });
