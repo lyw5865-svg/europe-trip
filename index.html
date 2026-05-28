@@ -13,14 +13,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght=700;900&display=swap');
 
-        /* 🎨 配色控制中心 - 您可以在這裡隨時更換顏色 */
+        /* 🎨 配色控制中心 */
         :root {
-            --primary-color: #0077B6;    /* 主色：按鈕、標題強調 (目前為蔚藍) */
-            --bg-base: #FDF5E6;          /* 底色：網頁大背景 (目前為暖沙) */
+            --primary-color: #0077B6;    /* 主色：按鈕、標題強調 (蔚藍) */
+            --bg-base: #FDF5E6;          /* 底色：網頁大背景 (暖沙) */
             --bg-card: #FFFFFF;          /* 卡片底色 */
-            --accent-color: #F4A261;     /* 強調色：計帳、特殊標籤 (目前為珊瑚橘) */
+            --accent-color: #F4A261;     /* 強調色：計帳、特殊標籤 (珊瑚橘) */
             --text-main: #1A1A1A;        /* 主要文字顏色 */
             --border-color: #1A1A1A;     /* 邊框顏色 */
             --secondary-bg: #D0E1E9;     /* 首頁背景底色 (淺灰藍) */
@@ -132,15 +132,18 @@
                     </div>
                     <div class="grid grid-cols-2 gap-4 p-5 bg-white border-b-4 border-black">
                         <div>
-                            <p class="text-xs font-black text-gray-400">起飛</p>
+                            <p class="text-xs font-black text-gray-400">起飛時間 (DEP)</p>
                             <p class="text-xl font-black text-primary">{{ flight.dep }}</p>
                         </div>
                         <div>
-                            <p class="text-xs font-black text-gray-400">降落</p>
+                            <p class="text-xs font-black text-gray-400">降落時間 (ARR)</p>
                             <p class="text-xl font-black text-gray-800">{{ flight.arr }}</p>
                         </div>
                     </div>
-                    <div class="p-5 bg-orange-50 text-left text-sm font-bold">{{ flight.note }}</div>
+                    <div class="p-5 bg-orange-50 text-left text-sm font-bold whitespace-pre-line leading-relaxed">
+                        <span class="text-amber-800 block text-xs font-black mb-1">💡 航班備忘：</span>
+                        {{ flight.note || "暫無填寫備忘事項。" }}
+                    </div>
                 </div>
             </div>
         </div>
@@ -154,19 +157,23 @@
                     D{{ d }}<br><span class="text-[10px]">{{ info.date }}</span>
                 </button>
             </div>
+            
             <div class="mt-2 space-y-4" v-if="daysData[activeDay]">
-                <div v-for="(event, idx) in daysData[activeDay].events" :key="idx" class="neo-brutal bg-white p-5 flex gap-4 border-4">
-                    <div class="flex flex-col items-center pt-1 min-w-[60px]">
-                        <span class="text-lg font-black leading-none">{{ event.time }}</span>
-                        <div class="w-1 flex-grow bg-black/10 my-2"></div>
+                <div v-for="(event, idx) in daysData[activeDay].events" :key="idx" class="neo-brutal bg-white p-5 flex gap-4 border-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                    <div class="flex flex-col items-center pt-1 min-w-[65px] text-left">
+                        <span class="text-lg font-black leading-none whitespace-nowrap text-black">{{ event.time }}</span>
+                        <div class="w-0.5 flex-grow bg-black/10 my-2"></div>
                     </div>
-                    <div class="flex-grow">
-                        <span :class="event.tagColor" class="px-2 py-0.5 text-[10px] font-black text-white rounded uppercase">{{ event.tag }}</span>
-                        <h3 class="text-xl font-black leading-tight mt-1">{{ event.title }}</h3>
+                    <div class="flex-grow text-left">
+                        <div class="mb-1">
+                            <span :class="event.tagColor" class="px-2 py-0.5 text-[10px] font-black text-white rounded uppercase tracking-tighter">{{ event.tag }}</span>
+                        </div>
+                        <h3 class="text-xl font-black leading-tight">{{ event.title }}</h3>
                         <p class="text-sm font-bold text-gray-500 mt-2 whitespace-pre-line leading-snug" v-html="event.desc"></p>
                     </div>
                 </div>
             </div>
+            <p v-else class="text-center font-black text-gray-400 mt-10">讀取中或試算表內尚無此天數資料...</p>
         </div>
 
         <div v-if="view === 'expense'" class="p-4 min-h-screen">
@@ -193,130 +200,4 @@
                 <div v-for="(item, index) in expenses" :key="index" class="flex justify-between items-center border-b border-dashed border-black py-2">
                     <div class="font-bold">
                         <p>{{ item.name }}</p>
-                        <p class="text-xs text-gray-400">{{ item.amount }} {{ item.currency }}</p>
-                    </div>
-                    <button @click="deleteExpense(index)" class="text-red-600 font-bold bg-red-50 px-2 border border-black">刪除</button>
-                </div>
-            </div>
-        </div>
-
-        <div v-if="view === 'currency'" class="p-4 min-h-screen text-center">
-            <button @click="switchView('home')" class="neo-brutal bg-white w-full py-6 mb-8 text-3xl font-black border-4">返回首頁</button>
-            <div class="neo-brutal bg-white p-6 mb-6 border-4">
-                <div class="text-right border-b-4 border-black pb-2 mb-4"><p class="text-lg font-bold text-gray-400">歐元 EUR</p><p class="text-5xl font-black">{{ eurDisplay || 0 }}</p></div>
-                <div class="text-right"><p class="text-lg font-bold text-primary">台幣 TWD</p><p class="text-5xl font-black text-primary">${{ Math.round(Number(eurDisplay) * eurRate).toLocaleString() }}</p></div>
-            </div>
-            <div class="grid grid-cols-3 gap-4">
-                <button v-for="n in ['1','2','3','4','5','6','7','8','9','0','00']" @click="appendEur(n)" class="calc-btn border-4">{{n}}</button>
-                <button @click="eurDisplay = ''" class="calc-btn border-4 bg-red-400 text-white">C</button>
-            </div>
-        </div>
-
-    </div>
-
-    <div v-else class="min-h-screen flex items-center justify-center p-8">
-        <div class="neo-brutal bg-accent p-10 max-w-md border-4 text-center">
-            <h1 class="text-7xl font-black mb-4">STOP</h1>
-            <p class="text-xl font-bold">請透過正確連結存取計畫</p>
-        </div>
-    </div>
-</div>
-
-<script>
-const { createApp, ref, computed, onMounted, watch } = Vue;
-
-createApp({
-    setup() {
-        const SHEET_URLS = {
-            itinerary: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQnPh57pgIDXLCFGvbjGClXofcBg64KeWOyLGTib5Lz6oeIKwqLznHMMo3Tt8OLlKjGDi_HIS6sEVK8/pub?output=csv",
-            flights: "https://docs.google.com/spreadsheets/d/e/2PACX-1vS40iTSsR86m36CtNla9vHaDoKkWBK7ZioEShTZR2TbyNXZABggoOqSUvOK1lHDtwKKwaQbVV4BmS8p/pub?output=csv"
-        };
-
-        const isAuthorized = ref(false);
-        const view = ref('home');
-        const activeDay = ref(1);
-        const eurDisplay = ref("");
-        const currentTemp = ref("--");
-        const eurRate = ref(35.5);
-
-        const daysData = ref({});
-        const flightDatabase = ref({});
-
-        const parseCSV = (text) => {
-            if (!text) return [];
-            return text.split('\n').map(line => {
-                return line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || line.split(',');
-            }).map(row => row ? row.map(val => val.replace(/^"|"$/g, '').trim()) : []);
-        };
-
-        const loadTravelData = async () => {
-            try {
-                const fRes = await fetch(SHEET_URLS.flights);
-                const fRows = parseCSV(await fRes.text());
-                fRows.slice(1).forEach(row => {
-                    if(row[0]) {
-                        flightDatabase.value[row[0].toUpperCase()] = { from: row[1], to: row[2], dep: row[3], arr: row[4], note: row[5] };
-                    }
-                });
-
-                const iRes = await fetch(SHEET_URLS.itinerary);
-                const iRows = parseCSV(await iRes.text());
-                const tempDaysData = {};
-
-                iRows.slice(1).forEach(row => {
-                    if (row.length < 4 || !row[0]) return;
-                    const dayNum = parseInt(row[0]);
-                    const typeStr = row[3] || "";
-                    const titleStr = row[4] || "";
-                    if (!tempDaysData[dayNum]) tempDaysData[dayNum] = { date: row[1], events: [] };
-
-                    let tagColor = "bg-gray-500";
-                    let finalTitle = titleStr;
-
-                    if (typeStr === "航班" || typeStr === "Flight") {
-                        tagColor = "bg-blue-600";
-                        const flightInfo = flightDatabase.value[titleStr.toUpperCase()];
-                        if (flightInfo) {
-                            finalTitle = `✈️ ${titleStr.toUpperCase()} (${flightInfo.from} → ${flightInfo.to})`;
-                        }
-                    } else if (typeStr === "美食" || typeStr === "餐廳") tagColor = "bg-emerald-600";
-                    else if (typeStr === "逛街" || typeStr === "購物") tagColor = "bg-amber-500";
-                    else if (typeStr === "住宿") tagColor = "bg-orange-500";
-                    else if (typeStr === "交通") tagColor = "bg-zinc-800";
-                    else tagColor = "bg-rose-500";
-
-                    tempDaysData[dayNum].events.push({
-                        time: row[2], tag: typeStr, tagColor, title: finalTitle,
-                        desc: (row[5] || "").replace(/\\n/g, '<br>')
-                    });
-                });
-                daysData.value = tempDaysData;
-            } catch (e) { console.error(e); }
-        };
-
-        const newExpenseName = ref("");
-        const newExpenseAmount = ref(null);
-        const newExpenseCurrency = ref("EUR");
-        const expenses = ref(JSON.parse(localStorage.getItem('europe_expenses')) || []);
-        watch(expenses, (nv) => localStorage.setItem('europe_expenses', JSON.stringify(nv)), { deep: true });
-        const convertToTWD = (i) => i.currency === "EUR" ? i.amount * eurRate.value : i.amount;
-        const totalTWD = computed(() => expenses.value.reduce((s, i) => s + convertToTWD(i), 0));
-        const addExpense = () => { if(newExpenseName.value && newExpenseAmount.value) { expenses.value.push({ name: newExpenseName.value, amount: newExpenseAmount.value, currency: newExpenseCurrency.value }); newExpenseName.value = ""; newExpenseAmount.value = null; }};
-        const deleteExpense = (i) => { if(confirm("刪除？")) expenses.value.splice(i, 1); };
-
-        const switchView = (v) => { view.value = v; window.scrollTo(0, 0); };
-        const appendEur = (v) => { if(eurDisplay.value.length < 10) eurDisplay.value += v; };
-
-        onMounted(() => {
-            loadTravelData();
-            fetch('https://api.open-meteo.com/v1/forecast?latitude=48.8566&longitude=2.3522&current_weather=true')
-                .then(r => r.json()).then(d => { if(d.current_weather) currentTemp.value = Math.round(d.current_weather.temperature); });
-            if (new URLSearchParams(window.location.search).get('token') === 'go2026') isAuthorized.value = true;
-        });
-
-        return { isAuthorized, view, activeDay, eurDisplay, currentTemp, daysData, flightDatabase, switchView, appendEur, eurRate, newExpenseName, newExpenseAmount, newExpenseCurrency, expenses, totalTWD, addExpense, deleteExpense };
-    }
-}).mount('#app');
-</script>
-</body>
-</html>
+                        <p class="text-xs text-gray
