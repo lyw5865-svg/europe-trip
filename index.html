@@ -264,19 +264,38 @@ createApp({
         const daysData = ref({});
         const flightDatabase = ref({});
 
+        // 🛠️ 【修正核心】：強健版 CSV 解析器，完美保留備註中的逗號、雙引號與任何換行文字
         const parseCSV = (text) => {
             if (!text) return [];
-            return text.split('\n').map(line => {
-                return line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || line.split(',');
-            }).map(row => row ? row.map(val => val.replace(/^"|"$/g, '').trim()) : []);
+            const result = [];
+            let row = [''];
+            let inQuotes = false;
+
+            for (let i = 0; i < text.length; i++) {
+                const cc = text[i], nc = text[i+1];
+                if (cc === '"') {
+                    if (inQuotes && nc === '"') { row[row.length - 1] += '"'; i++; }
+                    else { inQuotes = !inQuotes; }
+                } else if (cc === ',' && !inQuotes) {
+                    row.push('');
+                } else if ((cc === '\r' || cc === '\n') && !inQuotes) {
+                    if (cc === '\r' && nc === '\n') { i++; }
+                    result.push(row.map(val => val.trim()));
+                    row = [''];
+                } else {
+                    row[row.length - 1] += cc;
+                }
+            }
+            if (row.length > 1 || row[0] !== '') {
+                result.push(row.map(val => val.trim()));
+            }
+            return result;
         };
 
         const cleanFlightCode = (str) => {
             if (!str) return "";
             return str.toUpperCase().replace(/\s+/g, '').replace(/\(\+\d+\)/g, '').trim();
         };
-
-        // 💡 提示：原本這裡的 extractMapUrl 函式已經被乾淨地移除了，因為方案二直接讀取 G 欄。
 
         const loadTravelData = async () => {
             try {
@@ -308,7 +327,7 @@ createApp({
                     let titleStr = row[4] || "";
                     let descStr = row[5] || "";
                     
-                    // 🗺️ 【方案二核心】：直接讀取試算表的第 7 欄 (G欄) 的地圖網址
+                    // 🗺️ 獨立讀取 G 欄地圖網址
                     const mapUrl = row[6] || null;
 
                     if (!tempDaysData[dayNum]) tempDaysData[dayNum] = { date: row[1], events: [] };
@@ -337,7 +356,7 @@ createApp({
                         tagColor, 
                         title: titleStr, 
                         desc: descStr.replace(/\\n/g, '\n').replace(/\n/g, '<br>'),
-                        mapUrl: mapUrl // 👈 完美存入 event 物件中
+                        mapUrl: mapUrl 
                     });
                 });
                 daysData.value = tempDaysData;
