@@ -263,10 +263,14 @@
                                 </p>
                             </div>
                             
-                            <div v-if="rest.menu" class="border-2 border-zinc-400 p-3 bg-zinc-50 rounded relative">
-                                <span class="absolute -top-2.5 left-3 bg-white border border-zinc-400 px-2 py-0.5 text-[10px] font-black text-zinc-500">📖 菜單參考/翻譯</span>
-                                <p class="text-sm font-medium text-gray-600 leading-relaxed whitespace-pre-line pt-1" v-html="rest.menu"></p>
-                            </div>
+                            <div v-if="rest.menuUrl" class="border-2 border-zinc-400 p-3 bg-zinc-50 rounded relative">
+    <span class="absolute -top-2.5 left-3 bg-white border border-zinc-400 px-2 py-0.5 text-[10px] font-black text-zinc-500">📖 菜單服務</span>
+    
+    <a :href="rest.menuUrl" target="_blank" 
+       class="flex items-center justify-center gap-2 w-full py-3 text-sm font-black text-white bg-zinc-800 hover:bg-black transition-all rounded neo-brutal">
+        <i class="fas fa-book-open"></i> 點擊查看完整菜單與翻譯
+    </a>
+</div>
                             
                             <div v-if="rest.mapUrl" class="pt-2 flex justify-end border-t border-dashed border-gray-200">
                                 <a :href="rest.mapUrl" target="_blank" class="bg-zinc-200 text-zinc-800 px-4 py-1.5 rounded text-xs font-black neo-brutal inline-flex items-center gap-2 border-2">
