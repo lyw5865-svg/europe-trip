@@ -471,14 +471,16 @@ createApp({
                         if (row.length < 3 || !row[2]) return; // 至少要有餐廳名稱才處理
                         
                         const item = {
-                            date: row[0] || "",
-                            time: row[1] || "",
-                            name: row[2],
-                            type: row[3] || "未分類",
-                            booking: row[4] || "無資料",
-                            menu: (row[5] || "").replace(/\\n/g, '\n').replace(/\n/g, '<br>'),
-                            mapUrl: row[6] || null
-                        };
+    date: row[0] || "",
+    time: row[1] || "",
+    name: row[2],
+    type: row[3] || "未分類",
+    booking: row[4] || "無資料",
+    // --- 修改這裡 ---
+    menuUrl: row[5] || "", // 將原本的 menu 改為 menuUrl，直接讀取儲存格內的連結網址
+    // ----------------
+    mapUrl: row[6] || null
+};
 
                         // 判斷是否為備用：若是日期欄為空、或是包含"備用"二字，就丟到備用區
                         if (!item.date || item.date.includes("備用")) {
