@@ -24,6 +24,7 @@
             --text-main: #1A1A1A;        /* 主要文字顏色 */
             --border-color: #1A1A1A;     /* 邊框顏色 */
             --secondary-bg: #A8DADC;     /* 莫內水藍 */
+            --food-color: #FFB703;       /* 美食特調橘黃 */
         }
 
         body { 
@@ -55,6 +56,7 @@
         .text-primary { color: var(--primary-color); }
         .bg-primary { background-color: var(--primary-color); }
         .bg-accent { background-color: var(--accent-color); }
+        .bg-food { background-color: var(--food-color); }
         .border-primary { border-color: var(--border-color); }
 
         [v-cloak] { display: none; }
@@ -83,6 +85,14 @@
                         <h2 class="text-4xl font-black leading-none">完整行程</h2>
                     </div>
                     <i class="fas fa-map-marked-alt text-8xl opacity-5 absolute -right-4 -bottom-4 rotate-12"></i>
+                </div>
+
+                <div @click="switchView('restaurants')" class="neo-elegant bg-food col-span-2 p-6 flex items-center justify-between cursor-pointer relative overflow-hidden text-left border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+                    <div class="z-10">
+                        <span class="bg-black text-white px-3 py-1 text-xs font-black tracking-widest uppercase rounded-full mb-2 inline-block">Gourmet Guide</span>
+                        <h2 class="text-4xl font-black leading-none text-black">美食餐廳指南</h2>
+                    </div>
+                    <i class="fas fa-utensils text-8xl opacity-15 absolute -right-4 -bottom-4 rotate-12"></i>
                 </div>
 
                 <div @click="switchView('tickets')" class="neo-elegant bg-primary text-white col-span-2 p-6 flex items-center justify-between cursor-pointer relative overflow-hidden text-left border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
@@ -191,6 +201,85 @@
             <p v-else class="text-center font-black text-gray-400 mt-10">讀取中或試算表內尚無此天數資料...</p>
         </div>
 
+        <div v-if="view === 'restaurants'" class="p-4 min-h-screen">
+            <button @click="switchView('home')" class="neo-brutal bg-white w-full py-6 mb-8 text-3xl font-black border-4">返回首頁</button>
+            
+            <div class="mb-10">
+                <div class="inline-block bg-black text-white px-4 py-1 text-sm font-black tracking-widest uppercase rounded-md mb-4 neo-elegant">
+                    🍽️ 已排定行程餐廳
+                </div>
+                
+                <div class="space-y-6" v-if="restaurantDatabase.scheduled.length > 0">
+                    <div v-for="(rest, idx) in restaurantDatabase.scheduled" :key='idx' class="neo-brutal bg-white border-4 overflow-hidden">
+                        <div class="bg-primary text-white p-4 border-b-4 border-black flex justify-between items-center">
+                            <div class="flex items-center gap-2">
+                                <span class="bg-food text-black px-2 py-1 text-xs font-black rounded">{{ rest.date }}</span>
+                                <span class="bg-black text-white border border-white px-2 py-1 text-xs font-black rounded">{{ rest.time }}</span>
+                            </div>
+                            <span class="bg-white text-black px-3 py-0.5 text-xs font-black rounded-full">{{ rest.type }}</span>
+                        </div>
+                        
+                        <div class="p-5 text-left space-y-4">
+                            <div>
+                                <h3 class="text-2xl font-black tracking-tight mb-1">{{ rest.name }}</h3>
+                                <p class="text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-400 px-3 py-1.5 rounded inline-block">
+                                    📌 訂位狀態：{{ rest.booking }}
+                                </p>
+                            </div>
+                            
+                            <div v-if="rest.menu" class="border-2 border-black p-3 bg-stone-50 rounded relative">
+                                <span class="absolute -top-2.5 left-3 bg-white border border-black px-2 py-0.5 text-[10px] font-black">📖 菜單與中文翻譯</span>
+                                <p class="text-sm font-bold text-gray-700 leading-relaxed whitespace-pre-line pt-1" v-html="rest.menu"></p>
+                            </div>
+                            
+                            <div v-if="rest.mapUrl" class="pt-2 flex justify-end border-t border-dashed border-gray-300">
+                                <a :href="rest.mapUrl" target="_blank" class="bg-accent text-black px-4 py-2 rounded text-xs font-black tracking-wider neo-brutal inline-flex items-center gap-2 border-2">
+                                    <i class="fas fa-utensils"></i> 🗺️ 前往餐廳地圖導航
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p v-else class="text-center font-black text-gray-400 py-4">目前沒有已排定的餐廳資料。</p>
+            </div>
+
+            <div>
+                <div class="inline-block bg-zinc-700 text-white px-4 py-1 text-sm font-black tracking-widest uppercase rounded-md mb-4 neo-elegant">
+                    💡 口袋備用名單
+                </div>
+                
+                <div class="space-y-6" v-if="restaurantDatabase.backup.length > 0">
+                    <div v-for="(rest, idx) in restaurantDatabase.backup" :key='idx' class="neo-brutal bg-stone-100 border-4 overflow-hidden opacity-90">
+                        <div class="bg-zinc-800 text-white p-3 border-b-4 border-black flex justify-between items-center">
+                            <span class="bg-amber-500 text-black px-2 py-0.5 text-xs font-black rounded">備用口袋名單</span>
+                            <span class="bg-white text-black px-3 py-0.5 text-xs font-black rounded-full">{{ rest.type || '未分類' }}</span>
+                        </div>
+                        
+                        <div class="p-5 text-left space-y-4 bg-white">
+                            <div>
+                                <h3 class="text-xl font-black tracking-tight mb-1 text-zinc-700">{{ rest.name }}</h3>
+                                <p v-if="rest.booking" class="text-xs font-bold text-gray-500 bg-gray-100 border border-gray-300 px-2 py-1 rounded inline-block">
+                                    備忘：{{ rest.booking }}
+                                </p>
+                            </div>
+                            
+                            <div v-if="rest.menu" class="border-2 border-zinc-400 p-3 bg-zinc-50 rounded relative">
+                                <span class="absolute -top-2.5 left-3 bg-white border border-zinc-400 px-2 py-0.5 text-[10px] font-black text-zinc-500">📖 菜單參考/翻譯</span>
+                                <p class="text-sm font-medium text-gray-600 leading-relaxed whitespace-pre-line pt-1" v-html="rest.menu"></p>
+                            </div>
+                            
+                            <div v-if="rest.mapUrl" class="pt-2 flex justify-end border-t border-dashed border-gray-200">
+                                <a :href="rest.mapUrl" target="_blank" class="bg-zinc-200 text-zinc-800 px-4 py-1.5 rounded text-xs font-black neo-brutal inline-flex items-center gap-2 border-2">
+                                    🔍 查看地圖位置
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p v-else class="text-center font-black text-gray-400 py-4">目前沒有備用餐廳資料。</p>
+            </div>
+        </div>
+
         <div v-if="view === 'expense'" class="p-4 min-h-screen">
             <button @click="switchView('home')" class="neo-brutal bg-white w-full py-6 mb-6 text-3xl font-black border-4">返回首頁</button>
             <div class="neo-brutal bg-white p-5 mb-6 border-4">
@@ -249,9 +338,11 @@ const { createApp, ref, computed, onMounted, watch } = Vue;
 
 createApp({
     setup() {
+        // 🔗 在此更換成你的三個 Google 表單發佈網址
         const SHEET_URLS = {
             itinerary: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQnPh57pgIDXLCFGvbjGClXofcBg64KeWOyLGTib5Lz6oeIKwqLznHMMo3Tt8OLlKjGDi_HIS6sEVK8/pub?output=csv",
-            flights: "https://docs.google.com/spreadsheets/d/e/2PACX-1vS40iTSsR86m36CtNla9vHaDoKkWBK7ZioEShTZR2TbyNXZABggoOqSUvOK1lHDtwKKwaQbVV4BmS8p/pub?output=csv"
+            flights: "https://docs.google.com/spreadsheets/d/e/2PACX-1vS40iTSsR86m36CtNla9vHaDoKkWBK7ZioEShTZR2TbyNXZABggoOqSUvOK1lHDtwKKwaQbVV4BmS8p/pub?output=csv",
+            restaurants: "請在此替換成你第三個表單的CSV發佈網址" 
         };
 
         const isAuthorized = ref(false);
@@ -263,8 +354,11 @@ createApp({
 
         const daysData = ref({});
         const flightDatabase = ref({});
+        
+        // 🏢 新增：儲存分類後的餐廳資料庫
+        const restaurantDatabase = ref({ scheduled: [], backup: [] });
 
-        // 🛠️ 【修正核心】：強健版 CSV 解析器，完美保留備註中的逗號、雙引號與任何換行文字
+        // 🛠️ 強健版 CSV 解析器，完美保留備註、菜單中的逗號、雙引號與任何換行文字
         const parseCSV = (text) => {
             if (!text) return [];
             const result = [];
@@ -299,6 +393,7 @@ createApp({
 
         const loadTravelData = async () => {
             try {
+                // 1. 載入航班資料
                 const fRes = await fetch(SHEET_URLS.flights);
                 const fRows = parseCSV(await fRes.text());
                 fRows.slice(1).forEach(row => {
@@ -315,6 +410,7 @@ createApp({
                     }
                 });
 
+                // 2. 載入行程資料
                 const iRes = await fetch(SHEET_URLS.itinerary);
                 const iRows = parseCSV(await iRes.text());
                 const tempDaysData = {};
@@ -326,8 +422,6 @@ createApp({
                     const typeStr = row[3] || "";
                     let titleStr = row[4] || "";
                     let descStr = row[5] || "";
-                    
-                    // 🗺️ 獨立讀取 G 欄地圖網址
                     const mapUrl = row[6] || null;
 
                     if (!tempDaysData[dayNum]) tempDaysData[dayNum] = { date: row[1], events: [] };
@@ -360,7 +454,44 @@ createApp({
                     });
                 });
                 daysData.value = tempDaysData;
-            } catch (e) { console.error(e); }
+
+                // 3. 載入並處理美食餐廳資料
+                if (SHEET_URLS.restaurants && SHEET_URLS.restaurants.startsWith("http")) {
+                    const rRes = await fetch(SHEET_URLS.restaurants);
+                    const rRows = parseCSV(await rRes.text());
+                    
+                    const tempScheduled = [];
+                    const tempBackup = [];
+
+                    rRows.slice(1).forEach(row => {
+                        if (row.length < 3 || !row[2]) return; // 至少要有餐廳名稱才處理
+                        
+                        const item = {
+                            date: row[0] || "",
+                            time: row[1] || "",
+                            name: row[2],
+                            type: row[3] || "未分類",
+                            booking: row[4] || "無資料",
+                            menu: (row[5] || "").replace(/\\n/g, '\n').replace(/\n/g, '<br>'),
+                            mapUrl: row[6] || null
+                        };
+
+                        // 判斷是否為備用：若是日期欄為空、或是包含"備用"二字，就丟到備用區
+                        if (!item.date || item.date.includes("備用")) {
+                            tempBackup.push(item);
+                        } else {
+                            tempScheduled.push(item);
+                        }
+                    });
+
+                    // 已安排的餐廳依照日期和時間做簡單排序
+                    tempScheduled.sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
+                    
+                    restaurantDatabase.value.scheduled = tempScheduled;
+                    restaurantDatabase.value.backup = tempBackup;
+                }
+
+            } catch (e) { console.error("資料載入出錯：", e); }
         };
 
         const newExpenseName = ref("");
@@ -383,7 +514,7 @@ createApp({
             if (new URLSearchParams(window.location.search).get('token') === 'go2026') isAuthorized.value = true;
         });
 
-        return { isAuthorized, view, activeDay, eurDisplay, currentTemp, daysData, flightDatabase, switchView, appendEur, eurRate, newExpenseName, newExpenseAmount, newExpenseCurrency, expenses, totalTWD, addExpense, deleteExpense };
+        return { isAuthorized, view, activeDay, eurDisplay, currentTemp, daysData, flightDatabase, restaurantDatabase, switchView, appendEur, eurRate, newExpenseName, newExpenseAmount, newExpenseCurrency, expenses, totalTWD, addExpense, deleteExpense };
     }
 }).mount('#app');
 </script>
