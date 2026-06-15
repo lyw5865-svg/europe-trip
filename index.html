@@ -191,6 +191,20 @@
                         </div>
                     </div>
                     
+                    <div v-if="event.restaurantId && restaurantById[event.restaurantId]" class="mt-3 border-2 border-emerald-500 bg-emerald-50 p-3 rounded">
+    <div class="text-xs font-black text-emerald-700 mb-1">🍽️ 餐廳資訊</div>
+    <div class="text-sm font-bold leading-relaxed">
+        <p>訂位狀態：{{ restaurantById[event.restaurantId].booking }}</p>
+        <p>餐廳種類：{{ restaurantById[event.restaurantId].type }}</p>
+    </div>
+
+    <div v-if="restaurantById[event.restaurantId].menuUrl" class="mt-3">
+        <a :href="restaurantById[event.restaurantId].menuUrl" target="_blank"
+           class="inline-block bg-zinc-800 text-white px-4 py-2 rounded text-xs font-black border-2 border-black">
+            📖 查看菜單與翻譯
+        </a>
+    </div>
+</div>
                     <div v-if="event.mapUrl" class="mt-2 border-t border-dashed border-gray-200 pt-3 flex justify-end">
                         <a :href="event.mapUrl" target="_blank" class="bg-accent text-black px-4 py-2 rounded text-xs font-black tracking-wider neo-brutal inline-flex items-center gap-2 border-2">
                             <i class="fas fa-location-arrow"></i> 🗺️ 開啟 GOOGLE MAP 導航
@@ -365,6 +379,7 @@ createApp({
         
         // 🏢 新增：儲存分類後的餐廳資料庫
         const restaurantDatabase = ref({ scheduled: [], backup: [] });
+        const restaurantById = ref({});
 
         // 🛠️ 強健版 CSV 解析器，完美保留備註、菜單中的逗號、雙引號與任何換行文字
         const parseCSV = (text) => {
@@ -431,6 +446,9 @@ createApp({
                     let titleStr = row[4] || "";
                     let descStr = row[5] || "";
                     const mapUrl = row[6] || null;
+                    const restaurantId = row[7] || "";
+                    const priority = row[8] || "";
+                    const status = row[9] || "";
 
                     if (!tempDaysData[dayNum]) tempDaysData[dayNum] = { date: row[1], events: [] };
 
@@ -458,7 +476,10 @@ createApp({
                         tagColor, 
                         title: titleStr, 
                         desc: descStr.replace(/\\n/g, '\n').replace(/\n/g, '<br>'),
-                        mapUrl: mapUrl 
+                        mapUrl: mapUrl,
+                        restaurantId: restaurantId,
+                        priority: priority,
+                        status: status
                     });
                 });
                 daysData.value = tempDaysData;
@@ -483,8 +504,12 @@ createApp({
     // --- 修改這裡 ---
     menuUrl: row[5] || "", // 將原本的 menu 改為 menuUrl，直接讀取儲存格內的連結網址
     // ----------------
-    mapUrl: row[6] || null
+    mapUrl: row[6] || null,
+    restaurantId: row[7] || ""
 };
+                        if (item.restaurantId) {
+                            restaurantById.value[item.restaurantId] = item;
+                        }
 
                         // 判斷是否為備用：若是日期欄為空、或是包含"備用"二字，就丟到備用區
                         if (!item.date || item.date.includes("備用")) {
@@ -524,7 +549,7 @@ createApp({
             if (new URLSearchParams(window.location.search).get('token') === 'go2026') isAuthorized.value = true;
         });
 
-        return { isAuthorized, view, activeDay, eurDisplay, currentTemp, daysData, flightDatabase, restaurantDatabase, switchView, appendEur, eurRate, newExpenseName, newExpenseAmount, newExpenseCurrency, expenses, totalTWD, addExpense, deleteExpense };
+        return { isAuthorized, view, activeDay, eurDisplay, currentTemp, daysData, flightDatabase, restaurantDatabase, restaurantById, switchView, appendEur, eurRate, newExpenseName, newExpenseAmount, newExpenseCurrency, expenses, totalTWD, addExpense, deleteExpense };
     }
 }).mount('#app');
 </script>
