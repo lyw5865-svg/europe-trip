@@ -227,7 +227,47 @@
 <div v-if="restaurantById[event.restaurantId].setMemo" class="mt-3 border-t border-emerald-300 pt-3">
     <div class="text-xs font-black text-emerald-700 mb-1">💡 CP 值點法</div>
     <p class="text-sm font-bold leading-relaxed" v-html="formatMemo(restaurantById[event.restaurantId].setMemo)"></p>
-</div>                   
+</div> 
+<details v-if="menuByRestaurant[event.restaurantId] && menuByRestaurant[event.restaurantId].length" 
+         class="mt-3 border-t border-emerald-300 pt-3">
+    <summary class="cursor-pointer text-xs font-black text-emerald-700 mb-2">
+        📖 展開菜單翻譯（{{ menuByRestaurant[event.restaurantId].length }} 項）
+    </summary>
+
+    <div class="mt-3 space-y-3">
+        <div v-for="(dish, i) in menuByRestaurant[event.restaurantId]" 
+             :key="i" 
+             class="bg-white border-2 border-emerald-200 rounded p-3">
+
+            <div class="flex justify-between items-start gap-2 mb-1">
+                <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded text-[10px] font-black">
+                    {{ dish.category || '菜單' }}
+                </span>
+                <span v-if="dish.price" class="text-xs font-black text-red-600">
+                    {{ dish.price }}
+                </span>
+            </div>
+
+            <p class="text-sm font-black text-black leading-snug">
+                {{ dish.zhName }}
+            </p>
+
+            <p class="text-[11px] font-bold text-gray-500 leading-snug mt-1">
+                {{ dish.originalName }}
+            </p>
+
+            <p v-if="dish.desc" class="text-xs font-bold text-gray-700 leading-relaxed mt-2">
+                {{ dish.desc }}
+            </p>
+
+            <div v-if="dish.recommend || dish.note" class="mt-2 text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
+                <span v-if="dish.recommend">推薦度：{{ dish.recommend }}</span>
+                <span v-if="dish.recommend && dish.note">｜</span>
+                <span v-if="dish.note">{{ dish.note }}</span>
+            </div>
+        </div>
+    </div>
+</details>                        
 </div>
                     <div v-if="event.mapUrl" class="mt-2 border-t border-dashed border-gray-200 pt-3 flex justify-end">
                         <a :href="event.mapUrl" target="_blank" class="bg-accent text-black px-4 py-2 rounded text-xs font-black tracking-wider neo-brutal inline-flex items-center gap-2 border-2">
@@ -388,7 +428,8 @@ createApp({
         const SHEET_URLS = {
             itinerary: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQnPh57pgIDXLCFGvbjGClXofcBg64KeWOyLGTib5Lz6oeIKwqLznHMMo3Tt8OLlKjGDi_HIS6sEVK8/pub?output=csv",
             flights: "https://docs.google.com/spreadsheets/d/e/2PACX-1vS40iTSsR86m36CtNla9vHaDoKkWBK7ZioEShTZR2TbyNXZABggoOqSUvOK1lHDtwKKwaQbVV4BmS8p/pub?output=csv",
-            restaurants: "https://docs.google.com/spreadsheets/d/e/2PACX-1vThUgvi399SSM0oJkcAV0-IqFu34EZj5rRYePYkLqf7smQ6O3XcQYUuOlcVu71WgsVrVwZxiTJkQ790/pub?output=csv" 
+            restaurants: "https://docs.google.com/spreadsheets/d/e/2PACX-1vThUgvi399SSM0oJkcAV0-IqFu34EZj5rRYePYkLqf7smQ6O3XcQYUuOlcVu71WgsVrVwZxiTJkQ790/pub?output=csv",
+            menus: "https://docs.google.com/spreadsheets/d/e/2PACX-1vThUgvi399SSM0oJkcAV0-IqFu34EZj5rRYePYkLqf7smQ6O3XcQYUuOlcVu71WgsVrVwZxiTJkQ790/pub?output=csv"
         };
 
         const isAuthorized = ref(false);
@@ -404,6 +445,7 @@ createApp({
         // 🏢 新增：儲存分類後的餐廳資料庫
         const restaurantDatabase = ref({ scheduled: [], backup: [] });
         const restaurantById = ref({});
+        const menuByRestaurant = ref({});
 
         // 🛠️ 強健版 CSV 解析器，完美保留備註、菜單中的逗號、雙引號與任何換行文字
         const parseCSV = (text) => {
@@ -550,6 +592,36 @@ createApp({
                     
                     restaurantDatabase.value.scheduled = tempScheduled;
                     restaurantDatabase.value.backup = tempBackup;
+                    // 4. 載入菜單翻譯資料
+if (SHEET_URLS.menus && SHEET_URLS.menus.startsWith("http")) {
+    const mRes = await fetch(SHEET_URLS.menus);
+    const mRows = parseCSV(await mRes.text());
+
+    const tempMenus = {};
+
+    mRows.slice(1).forEach(row => {
+        if (!row[0] || !row[2]) return;
+
+        const item = {
+            restaurantId: row[0] || "",
+            category: row[1] || "",
+            originalName: row[2] || "",
+            zhName: row[3] || "",
+            desc: row[4] || "",
+            price: row[5] || "",
+            recommend: row[6] || "",
+            note: row[7] || ""
+        };
+
+        if (!tempMenus[item.restaurantId]) {
+            tempMenus[item.restaurantId] = [];
+        }
+
+        tempMenus[item.restaurantId].push(item);
+    });
+
+    menuByRestaurant.value = tempMenus;
+}
                 }
 
             } catch (e) { console.error("資料載入出錯：", e); }
@@ -595,7 +667,7 @@ createApp({
             if (new URLSearchParams(window.location.search).get('token') === 'go2026') isAuthorized.value = true;
         });
 
-        return { isAuthorized, view, activeDay, eurDisplay, currentTemp, daysData, flightDatabase, restaurantDatabase, restaurantById, switchView, appendEur, eurRate, newExpenseName, newExpenseAmount, newExpenseCurrency, expenses, totalTWD, addExpense, deleteExpense, getPriorityClass, getStatusClass, formatMemo };
+        return { isAuthorized, view, activeDay, eurDisplay, currentTemp, daysData, flightDatabase, restaurantDatabase, restaurantById, switchView, appendEur, eurRate, newExpenseName, newExpenseAmount, newExpenseCurrency, expenses, totalTWD, addExpense, deleteExpense, getPriorityClass, getStatusClass, formatMemo,menuByRestaurant };
     }
 }).mount('#app');
 </script>
