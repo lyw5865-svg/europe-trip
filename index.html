@@ -187,7 +187,22 @@
                                 <span :class="event.tagColor" class="px-2 py-0.5 text-[10px] font-black text-white rounded uppercase tracking-tighter">{{ event.tag }}</span>
                             </div>
                             <h3 class="text-xl font-black leading-tight">{{ event.title }}</h3>
-                            <p class="text-sm font-bold text-gray-500 mt-2 whitespace-pre-line leading-snug" v-html="event.desc"></p>
+
+<div v-if="event.priority || event.status" class="flex flex-wrap gap-2 mt-2">
+    <span v-if="event.priority" 
+          :class="getPriorityClass(event.priority)" 
+          class="px-2 py-1 text-[10px] font-black rounded border border-black">
+        {{ event.priority }}
+    </span>
+
+    <span v-if="event.status" 
+          :class="getStatusClass(event.status)" 
+          class="px-2 py-1 text-[10px] font-black rounded border border-black">
+        {{ event.status }}
+    </span>
+</div>
+
+<p class="text-sm font-bold text-gray-500 mt-2 whitespace-pre-line leading-snug" v-html="event.desc"></p>
                         </div>
                     </div>
                     
@@ -539,6 +554,22 @@ createApp({
         const addExpense = () => { if(newExpenseName.value && newExpenseAmount.value) { expenses.value.push({ name: newExpenseName.value, amount: newExpenseAmount.value, currency: newExpenseCurrency.value }); newExpenseName.value = ""; newExpenseAmount.value = null; }};
         const deleteExpense = (i) => { if(confirm("刪除？")) expenses.value.splice(i, 1); };
 
+        const getPriorityClass = (priority) => {
+            if (priority === "必去") return "bg-red-600 text-white";
+            if (priority === "可調整") return "bg-amber-400 text-black";
+            if (priority === "備案") return "bg-zinc-500 text-white";
+            return "bg-gray-200 text-gray-700";
+        };
+
+        const getStatusClass = (status) => {
+            if (status === "已確認") return "bg-emerald-600 text-white";
+            if (status === "已訂位") return "bg-blue-600 text-white";
+            if (status === "已購票") return "bg-purple-600 text-white";
+            if (status === "已付款") return "bg-teal-600 text-white";
+            if (status === "未處理") return "bg-gray-300 text-black";
+            if (status === "取消") return "bg-black text-white";
+            return "bg-gray-200 text-gray-700";
+        };
         const switchView = (v) => { view.value = v; window.scrollTo(0, 0); };
         const appendEur = (v) => { if(eurDisplay.value.length < 10) eurDisplay.value += v; };
 
@@ -549,7 +580,7 @@ createApp({
             if (new URLSearchParams(window.location.search).get('token') === 'go2026') isAuthorized.value = true;
         });
 
-        return { isAuthorized, view, activeDay, eurDisplay, currentTemp, daysData, flightDatabase, restaurantDatabase, restaurantById, switchView, appendEur, eurRate, newExpenseName, newExpenseAmount, newExpenseCurrency, expenses, totalTWD, addExpense, deleteExpense };
+        return { isAuthorized, view, activeDay, eurDisplay, currentTemp, daysData, flightDatabase, restaurantDatabase, restaurantById, switchView, appendEur, eurRate, newExpenseName, newExpenseAmount, newExpenseCurrency, expenses, totalTWD, addExpense, deleteExpense, getPriorityClass, getStatusClass };
     }
 }).mount('#app');
 </script>
