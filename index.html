@@ -228,13 +228,6 @@
     <div class="text-xs font-black text-emerald-700 mb-1">💡 CP 值點法</div>
     <p class="text-sm font-bold leading-relaxed" v-html="formatMemo(restaurantById[event.restaurantId].setMemo)"></p>
 </div> 
-<p class="mt-3 text-xs font-black text-red-600">
-RestaurantID={{ event.restaurantId }}
-</p>
-
-<p class="mt-1 text-xs font-black text-blue-600">
-MenuCount={{ menuByRestaurant[event.restaurantId]?.length || 0 }}
-</p>
 <details v-if="menuByRestaurant[event.restaurantId] && menuByRestaurant[event.restaurantId].length" 
          class="mt-3 border-t border-emerald-300 pt-3">
     <summary class="cursor-pointer text-xs font-black text-emerald-700 mb-2">
