@@ -216,7 +216,7 @@
     <div v-if="restaurantById[event.restaurantId].menuUrl" class="mt-3">
         <a :href="restaurantById[event.restaurantId].menuUrl" target="_blank"
            class="inline-block bg-zinc-800 text-white px-4 py-2 rounded text-xs font-black border-2 border-black">
-            📖 查看菜單與翻譯
+            📄 官方原文菜單
         </a>
     </div>
      <div v-if="restaurantById[event.restaurantId].recommendMemo" class="mt-3 border-t border-emerald-300 pt-3">
@@ -269,9 +269,9 @@
     </div>
 </details>                        
 </div>
-                    <div v-if="event.mapUrl" class="mt-2 border-t border-dashed border-gray-200 pt-3 flex justify-end">
-                        <a :href="event.mapUrl" target="_blank" class="bg-accent text-black px-4 py-2 rounded text-xs font-black tracking-wider neo-brutal inline-flex items-center gap-2 border-2">
-                            <i class="fas fa-location-arrow"></i> 🗺️ 開啟 GOOGLE MAP 導航
+                    <div v-if="event.mapUrl" class="mt-2 border-t border-dashed border-gray-200 pt-2 flex justify-end">
+                        <a :href="event.mapUrl" target="_blank" class="bg-accent text-black px-3 py-1 rounded text-[10px] font-black tracking-wide inline-flex items-center gap-1 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] transition-all">
+                            <i class="fas fa-location-arrow"></i> 地圖導航
                         </a>
                     </div>
                 </div>
@@ -305,14 +305,63 @@
                                 </p>
                             </div>
                             
-                            <div v-if="rest.menuUrl" class="border-2 border-zinc-400 p-3 bg-zinc-50 rounded relative mt-3">
-    <span class="absolute -top-2.5 left-3 bg-white border border-zinc-400 px-2 py-0.5 text-[10px] font-black text-zinc-500">📖 菜單服務</span>
-    
+                            <div v-if="rest.menuUrl" class="mt-3">
     <a :href="rest.menuUrl" target="_blank" 
-       class="block w-full text-center bg-zinc-800 text-white py-3 rounded font-black neo-brutal hover:bg-black transition-all">
-       <i class="fas fa-book-open"></i> 點擊查看完整菜單與翻譯
+       class="inline-flex items-center justify-center gap-1 bg-amber-400 text-black px-3 py-1.5 rounded text-xs font-black border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-amber-300 transition-all">
+       <i class="fas fa-book-open"></i> 官方原文菜單
     </a>
 </div>
+
+<div v-if="rest.recommendMemo" class="mt-3 border-t border-amber-200 pt-3">
+    <div class="text-xs font-black text-amber-700 mb-1">🍽️ 推薦單點</div>
+    <p class="text-sm font-bold leading-relaxed text-zinc-700" v-html="formatMemo(rest.recommendMemo)"></p>
+</div>
+
+<div v-if="rest.setMemo" class="mt-3 border-t border-amber-200 pt-3">
+    <div class="text-xs font-black text-amber-700 mb-1">💡 CP 值點法</div>
+    <p class="text-sm font-bold leading-relaxed text-zinc-700" v-html="formatMemo(rest.setMemo)"></p>
+</div>
+
+<details v-if="rest.restaurantId && menuByRestaurant[rest.restaurantId] && menuByRestaurant[rest.restaurantId].length" 
+         class="mt-3 border-2 border-amber-300 bg-amber-50 rounded p-3">
+    <summary class="cursor-pointer text-xs font-black text-amber-800">
+        📖 展開菜單翻譯（{{ menuByRestaurant[rest.restaurantId].length }} 項）
+    </summary>
+
+    <div class="mt-3 space-y-3">
+        <div v-for="(dish, i) in menuByRestaurant[rest.restaurantId]" 
+             :key="i" 
+             class="bg-white border-2 border-amber-200 rounded p-3">
+
+            <div class="flex justify-between items-start gap-2 mb-1">
+                <span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded text-[10px] font-black">
+                    {{ dish.category || '菜單' }}
+                </span>
+                <span v-if="dish.price" class="text-xs font-black text-red-600">
+                    {{ dish.price }}
+                </span>
+            </div>
+
+            <p class="text-sm font-black text-black leading-snug">
+                {{ dish.zhName }}
+            </p>
+
+            <p class="text-[11px] font-bold text-gray-500 leading-snug mt-1">
+                {{ dish.originalName }}
+            </p>
+
+            <p v-if="dish.desc" class="text-xs font-bold text-gray-700 leading-relaxed mt-2">
+                {{ dish.desc }}
+            </p>
+
+            <div v-if="dish.recommend || dish.note" class="mt-2 text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
+                <span v-if="dish.recommend">推薦度：{{ dish.recommend }}</span>
+                <span v-if="dish.recommend && dish.note">｜</span>
+                <span v-if="dish.note">{{ dish.note }}</span>
+            </div>
+        </div>
+    </div>
+</details>
                             
                             <div v-if="rest.mapUrl" class="pt-2 flex justify-end border-t border-dashed border-gray-300">
                                 <a :href="rest.mapUrl" target="_blank" class="bg-accent text-black px-4 py-2 rounded text-xs font-black tracking-wider neo-brutal inline-flex items-center gap-2 border-2">
@@ -345,14 +394,63 @@
                                 </p>
                             </div>
                             
-                            <div v-if="rest.menuUrl" class="border-2 border-zinc-400 p-3 bg-zinc-50 rounded relative mt-3">
-    <span class="absolute -top-2.5 left-3 bg-white border border-zinc-400 px-2 py-0.5 text-[10px] font-black text-zinc-500">📖 菜單服務</span>
-    
+                            <div v-if="rest.menuUrl" class="mt-3">
     <a :href="rest.menuUrl" target="_blank" 
-       class="block w-full text-center bg-zinc-800 text-white py-3 rounded font-black neo-brutal hover:bg-black transition-all">
-       <i class="fas fa-book-open"></i> 點擊查看完整菜單與翻譯
+       class="inline-flex items-center justify-center gap-1 bg-amber-400 text-black px-3 py-1.5 rounded text-xs font-black border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-amber-300 transition-all">
+       <i class="fas fa-book-open"></i> 官方原文菜單
     </a>
 </div>
+
+<div v-if="rest.recommendMemo" class="mt-3 border-t border-amber-200 pt-3">
+    <div class="text-xs font-black text-amber-700 mb-1">🍽️ 推薦單點</div>
+    <p class="text-sm font-bold leading-relaxed text-zinc-700" v-html="formatMemo(rest.recommendMemo)"></p>
+</div>
+
+<div v-if="rest.setMemo" class="mt-3 border-t border-amber-200 pt-3">
+    <div class="text-xs font-black text-amber-700 mb-1">💡 CP 值點法</div>
+    <p class="text-sm font-bold leading-relaxed text-zinc-700" v-html="formatMemo(rest.setMemo)"></p>
+</div>
+
+<details v-if="rest.restaurantId && menuByRestaurant[rest.restaurantId] && menuByRestaurant[rest.restaurantId].length" 
+         class="mt-3 border-2 border-amber-300 bg-amber-50 rounded p-3">
+    <summary class="cursor-pointer text-xs font-black text-amber-800">
+        📖 展開菜單翻譯（{{ menuByRestaurant[rest.restaurantId].length }} 項）
+    </summary>
+
+    <div class="mt-3 space-y-3">
+        <div v-for="(dish, i) in menuByRestaurant[rest.restaurantId]" 
+             :key="i" 
+             class="bg-white border-2 border-amber-200 rounded p-3">
+
+            <div class="flex justify-between items-start gap-2 mb-1">
+                <span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded text-[10px] font-black">
+                    {{ dish.category || '菜單' }}
+                </span>
+                <span v-if="dish.price" class="text-xs font-black text-red-600">
+                    {{ dish.price }}
+                </span>
+            </div>
+
+            <p class="text-sm font-black text-black leading-snug">
+                {{ dish.zhName }}
+            </p>
+
+            <p class="text-[11px] font-bold text-gray-500 leading-snug mt-1">
+                {{ dish.originalName }}
+            </p>
+
+            <p v-if="dish.desc" class="text-xs font-bold text-gray-700 leading-relaxed mt-2">
+                {{ dish.desc }}
+            </p>
+
+            <div v-if="dish.recommend || dish.note" class="mt-2 text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
+                <span v-if="dish.recommend">推薦度：{{ dish.recommend }}</span>
+                <span v-if="dish.recommend && dish.note">｜</span>
+                <span v-if="dish.note">{{ dish.note }}</span>
+            </div>
+        </div>
+    </div>
+</details>
                             
                             <div v-if="rest.mapUrl" class="pt-2 flex justify-end border-t border-dashed border-gray-200">
                                 <a :href="rest.mapUrl" target="_blank" class="bg-zinc-200 text-zinc-800 px-4 py-1.5 rounded text-xs font-black neo-brutal inline-flex items-center gap-2 border-2">
